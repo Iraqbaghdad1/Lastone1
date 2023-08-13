@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Gallery</title>
+<style>
+  #gallery-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  #gallery-image {
+    max-width: 100%;
+    max-height: 100%;
+  }
+</style>
+</head>
+<body>
+<div id="gallery-container">
+  <img id="gallery-image" src="" alt="Image">
+</div>
+<div id="controls">
+  <button id="prev-btn">Previous</button>
+  <button id="next-btn">Next</button>
+  <button id="update-btn">Update/Reset</button>
+</div>
+
+<script>
+const galleryContainer = document.getElementById("gallery-container");
+const galleryImage = document.getElementById("gallery-image");
+const prevButton = document.getElementById("prev-btn");
+const nextButton = document.getElementById("next-btn");
+const updateButton = document.getElementById("update-btn");
+
+let imageList = [];
+let currentIndex = 0;
+let timer;
+
+function fetchImages() {
+  fetch("https://comp125-a4-api.onrender.com/imagelist")
+    .then(response => response.json())
+    .then(data => {
+      imageList = data.ImageList;
+      showImage(currentIndex);
+      startRotation();
+    })
+    .catch(error => {
+      console.error("Error fetching images:", error);
+    });
+}
+
+function showImage(index) {
+  galleryImage.src = imageList[index].name;
+}
+
+function startRotation() {
+  clearInterval(timer);
+  timer = setInterval(() => {
+    currentIndex = (currentIndex + 1) % imageList.length;
+    showImage(currentIndex);
+  }, imageList[currentIndex].time);
+}
+
+prevButton.addEventListener("click", () => {
+  currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
+  showImage(currentIndex);
+  clearInterval(timer);
+  startRotation();
+});
+
+nextButton.addEventListener("click", () => {
+  currentIndex = (currentIndex + 1) % imageList.length;
+  showImage(currentIndex);
+  clearInterval(timer);
+  startRotation();
+});
+
+updateButton.addEventListener("click", () => {
+  currentIndex = 0;
+  fetchImages();
+});
+
+fetchImages();
+</script>
+</body>
+</html>
